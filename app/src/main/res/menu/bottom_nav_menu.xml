@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/restaurants"
+        android:icon="@drawable/baseline_fastfood_24"
+        android:title="Restaurants"/>
+    <item
+        android:id="@+id/order_history"
+        android:icon="@drawable/baseline_orders_24"
+        android:title="Order History"/>
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/baseline_settings_24"
+        android:title="Settings"/>
+
+</menu>
