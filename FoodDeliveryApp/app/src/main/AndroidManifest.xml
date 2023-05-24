@@ -11,6 +11,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FoodDeliveryApp"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAbQjyMpbImxn4mu30-NK6V_Soytr7Ok1A" />
+        <activity
+            android:name=".OrderProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProductsActivity"
+            android:exported="false" />
         <activity
             android:name=".ResetPasswordActivity"
             android:exported="false" />

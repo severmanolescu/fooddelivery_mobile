@@ -2,22 +2,20 @@ package com.example.fooddeliveryapp;
 
 import static android.content.ContentValues.TAG;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -31,15 +29,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class RestaurantsFragment extends Fragment {
+public class ProductsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference reference = database.getReference();
-
-    private ArrayList<String> restaurantList = new ArrayList<>();
-    private RestaurantAdapter adapter;
+    private ArrayList<String> productList = new ArrayList<>();
+    private ProductsAdapter adapter;
+    private ImageView backImageView;
 
     private double timisoaraLatitude = 45.7489;
     private double timisoaraLongitude = 21.2087;
@@ -47,30 +45,39 @@ public class RestaurantsFragment extends Fragment {
     private double bucurestiLatitude = 44.4268;
     private double bucurestiLongitude = 26.1025;
 
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view =  inflater.inflate(R.layout.fragment_restaurants, container, false);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_products);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.rv);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        backImageView = findViewById(R.id.backImageView2);
+        recyclerView = findViewById(R.id.productsRecycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-      //  getAddress(getActivity(),timisoaraLatitude, timisoaraLongitude); //timisoara
-        getAddress(getActivity(),bucurestiLatitude, bucurestiLongitude);// bucuresti
 
-        adapter = new RestaurantAdapter(restaurantList, getActivity());
+       // getAddress(this, timisoaraLatitude, timisoaraLongitude); // timisoara
+       getAddress(this, bucurestiLatitude, bucurestiLongitude); // bucuresti
+
+        adapter = new ProductsAdapter(productList, this);
         recyclerView.setAdapter(adapter);
 
+        backImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ProductsActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
 
-        return view;
+
     }
 
-    public void getRestaurantsTimisoara(){
-        reference.child("RestaurantsTimisoara").addChildEventListener(new ChildEventListener() {
+    public void getProductsTimisoara(){
+        reference.child("RestaurantsTimisoara").child("Mc Donalt's").child("Products").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                String restaurant = snapshot.getKey();
-                restaurantList.add(restaurant);
+                String product = snapshot.getKey();
+                productList.add(product);
                 adapter.notifyDataSetChanged();
             }
 
@@ -96,12 +103,12 @@ public class RestaurantsFragment extends Fragment {
         });
     }
 
-    public void getRestaurantsBucharest(){
-        reference.child("RestaurantsBucuresti").addChildEventListener(new ChildEventListener() {
+    public void getProductsBucharest(){
+        reference.child("RestaurantsBucuresti").child("Again Burger").child("Products").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                String restaurant = snapshot.getKey();
-                restaurantList.add(restaurant);
+                String product = snapshot.getKey();
+                productList.add(product);
                 adapter.notifyDataSetChanged();
             }
 
@@ -129,7 +136,7 @@ public class RestaurantsFragment extends Fragment {
 
     public void getAddress(Context context, double LATITUDE, double LONGITUDE) {
 
-    //Set Address
+        //Set Address
         try {
             Geocoder geocoder = new Geocoder(context, Locale.getDefault());
             List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
@@ -144,14 +151,10 @@ public class RestaurantsFragment extends Fragment {
                 String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
 
                 if(city.equals("Timișoara")){
-                    getRestaurantsTimisoara();
-                    Intent intent = new Intent(getActivity(),ProductsActivity.class);
-                    intent.putExtra("City", city);
+                    getProductsTimisoara();
                 }
                 else if(city.equals("Bucharest")){
-                    getRestaurantsBucharest();
-                    Intent intent = new Intent(getActivity(),ProductsActivity.class);
-                    intent.putExtra("City", city);
+                    getProductsBucharest();
                 }
 
                 Log.d(TAG, "getAddress:  address" + address);

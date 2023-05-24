@@ -14,9 +14,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,15 +27,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.ViewHolder> {
+public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.ViewHolder> {
 
-    private ArrayList<String> restaurantList = new ArrayList<>();
+    private ArrayList<String> productList = new ArrayList<>();
     private Context context;
-
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference reference = database.getReference();
 
@@ -43,15 +45,15 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Vi
     private double bucurestiLatitude = 44.4268;
     private double bucurestiLongitude = 26.1025;
 
-    public RestaurantAdapter(ArrayList<String> restaurantList, Context context) {
-        this.restaurantList = restaurantList;
+    public ProductsAdapter(ArrayList<String> productList, Context context) {
+        this.productList = productList;
         this.context = context;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.restaurant_card, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.product_card, parent, false);
 
         return new ViewHolder(view);
     }
@@ -59,51 +61,56 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
        // getAddress(context, timisoaraLatitude, timisoaraLongitude, holder, position); //timisoara
-        getAddress(context, bucurestiLatitude, bucurestiLongitude, holder, position); //bucuresti
+        getAddress(context, bucurestiLatitude, bucurestiLongitude, holder, position); // bucuresti
     }
 
     @Override
     public int getItemCount() {
-        return restaurantList.size();
+        return productList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView restaurantLogo;
-        private TextView restaurantName;
+        private ImageView productImage;
+        private TextView productName;
+        private TextView productPrice;
         private CardView cardView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            restaurantLogo = itemView.findViewById(R.id.logoImageView);
-            restaurantName = itemView.findViewById(R.id.restaurantNameTextView);
-            cardView = itemView.findViewById(R.id.cardView);
+            productImage = itemView.findViewById(R.id.productImage);
+            productName = itemView.findViewById(R.id.productNameText);
+            productPrice = itemView.findViewById(R.id.productPriceText);
+            cardView = itemView.findViewById(R.id.productCardView);
 
 
         }
     }
 
-    public void showTimisoaraRestaurants(ViewHolder holder, int position){
-        reference.child("RestaurantsTimisoara").child(restaurantList.get(position)).addValueEventListener(new ValueEventListener() {
+    public void showTimisoaraProducts(ViewHolder holder, int position){
+        reference.child("RestaurantsTimisoara").child("Mc Donalt's").child("Products").child(productList.get(position)).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String logo = snapshot.child("Logo").getValue().toString();
-                String name = snapshot.child("Name").getValue().toString();
+                String image = snapshot.child("image").getValue().toString();
+                String name = snapshot.child("name").getValue().toString();
+                String price = snapshot.child("price").getValue().toString();
 
-                holder.restaurantName.setText(name);
-                Picasso.get().load(logo).into(holder.restaurantLogo);
-
-                Intent intent = new Intent(context, ProductsActivity.class);
-                intent.putExtra("AdapterPosition", restaurantList.get(position));
+                holder.productName.setText(name);
+                holder.productPrice.setText(price);
+                Picasso.get().load(image).into(holder.productImage);
 
                 holder.cardView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(context, ProductsActivity.class);
+                        Intent intent = new Intent(context, OrderProductActivity.class);
+                        intent.putExtra("productName", name);
+                        intent.putExtra("productPrice", price);
+                        intent.putExtra("productImage", image);
                         context.startActivity(intent);
                     }
                 });
+
 
             }
 
@@ -114,26 +121,29 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Vi
         });
     }
 
-    public void showBucharestRestaurants(ViewHolder holder, int position){
-        reference.child("RestaurantsBucuresti").child(restaurantList.get(position)).addValueEventListener(new ValueEventListener() {
+    public void showBucharestProducts(ViewHolder holder, int position){
+        reference.child("RestaurantsBucuresti").child("Again Burger").child("Products").child(productList.get(position)).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String logo = snapshot.child("Logo").getValue().toString();
-                String name = snapshot.child("Name").getValue().toString();
+                String image = snapshot.child("image").getValue().toString();
+                String name = snapshot.child("name").getValue().toString();
+                String price = snapshot.child("price").getValue().toString();
 
-                holder.restaurantName.setText(name);
-                Picasso.get().load(logo).into(holder.restaurantLogo);
-
-                Intent intent = new Intent(context, ProductsActivity.class);
-                intent.putExtra("AdapterPosition", restaurantList.get(position));
+                holder.productName.setText(name);
+                holder.productPrice.setText(price);
+                Picasso.get().load(image).into(holder.productImage);
 
                 holder.cardView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(context, ProductsActivity.class);
+                        Intent intent = new Intent(context, OrderProductActivity.class);
+                        intent.putExtra("productName", name);
+                        intent.putExtra("productPrice", price);
+                        intent.putExtra("productImage", image);
                         context.startActivity(intent);
                     }
                 });
+
 
             }
 
@@ -143,7 +153,6 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Vi
             }
         });
     }
-
     public void getAddress(Context context, double LATITUDE, double LONGITUDE, ViewHolder holder, int position) {
 
         //Set Address
@@ -161,10 +170,10 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Vi
                 String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
 
                 if(city.equals("Timișoara")){
-                    showTimisoaraRestaurants(holder, position);
+                    showTimisoaraProducts(holder, position);
                 }
                 else if(city.equals("Bucharest")){
-                    showBucharestRestaurants(holder, position);
+                    showBucharestProducts(holder, position);
                 }
 
                 Log.d(TAG, "getAddress:  address" + address);
@@ -178,5 +187,6 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Vi
         }
         return;
     }
+
 
 }
